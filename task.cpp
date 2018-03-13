@@ -28,14 +28,14 @@ public:
 
 	~taskClass() { delete[] table; }
 
-	void step1()
+	void setTableSize()
 	{
 		cout << "Set table size\n";
 		cin >> table_size;
 	}
 
 
-	void step2()
+	void memoryReservation()
 	{
 		table = new long int[table_size];
 
@@ -46,13 +46,15 @@ public:
 		}
 	}
 
-	double average()
+	double arithmeticMeanCalculation()
 	{
-#define VERSION 1
+
 		// 1 = no critical section
 		// 2 = critical section
 		// 3 = critical section and local variable  
 		// 4 = clause "reduction" 
+
+#define VERSION 1
 
 #if (VERSION == 1)
 #pragma omp parallel for num_threads(5)
@@ -109,27 +111,26 @@ public:
 };
 
 
-
-
-
-
 int main()
 {
 	cout << "Hello\n";
 
 	taskClass ob;
 
-	ob.step1();
-	ob.step2();
+	ob.setTableSize();
+	ob.memoryReservation();
 
-	auto start = chrono::system_clock::now();
+	auto start = chrono::system_clock::now();         
 
-	cout << ob.average() << endl;
+	cout << ob.arithmeticMeanCalculation() << endl;
 
 	auto end = chrono::system_clock::now();
 
 	chrono::duration<double> elapsed_seconds = end - start;
-	cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
+	cout << "Elapsed time: " << elapsed_seconds.count() << "s\n";
+
+
+	system("pause");
 
 	return 0;
 }
