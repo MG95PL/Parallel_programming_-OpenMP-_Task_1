@@ -1,3 +1,16 @@
+/*
+Task 1
+Write program which calculate arithmetic mean from n -elements table. 
+The elements are intigers values from 0 to n. 
+In for loop use OpenMP standard to make the program faster in 4 ways:
+
+1. with no critical section
+2. using critical section
+3. using critical section and local variable
+4. using  clause "reduction"
+
+*/
+
 #include <iostream>
 #include <omp.h>
 #include <chrono>
@@ -7,69 +20,69 @@ using namespace std;
 
 class taskClass {
 
-	long  int* x;
-	long int size;
-	double result; 
+	long  int* table;
+	long int table_size;
+	double result;
 
 public:
 
-	~taskClass() { delete[] x; }
+	~taskClass() { delete[] table; }
 
 	void step1()
 	{
 		cout << "Set table size\n";
-		cin >> size;
+		cin >> table_size;
 	}
 
 
 	void step2()
 	{
-		x = new long int[size];
+		table = new long int[table_size];
 
 
-		for (int i = 0; i < size; i++)
+		for (int i = 0; i < table_size; i++)
 		{
-			x[i] = i+1;
+			table[i] = i + 1;
 		}
 	}
 
 	double average()
 	{
-#define WERSJA 1
-		// 1 = pragma for
-		// 2 = sekcja krytyczna
-		// 3 = sekscja krytyczna i zmienna lokalna  
-		// 4 = reduction 
+#define VERSION 1
+		// 1 = no critical section
+		// 2 = critical section
+		// 3 = critical section and local variable  
+		// 4 = clause "reduction" 
 
-#if (WERSJA == 1)
+#if (VERSION == 1)
+#pragma omp parallel for num_threads(5)
+
+		for (int i = 0; i < table_size; i++)
+		{
+			result += static_cast<double>(table[i]);
+		}
+		return result / table_size;
+#endif
+
+#if (VERSION == 2)
 #pragma omp parallel for num_threads(5)
 
 		for (int i = 0; i < size; i++)
 		{
-			result += static_cast<double>(x[i]);
-		}
-			return result / size;
-#endif
-			
-#if (WERSJA == 2)
-#pragma omp parallel for num_threads(5)
-
-			for (int i = 0; i < size; i++)
-			{
 #pragma omp critical 
-				result += static_cast<double>(x[i]);
-			}
-			return result / size;
+			result += static_cast<double>(table[i]);
+		}
+		return result / size;
 #endif
 
-#if (WERSJA == 3)
+#if (VERSION == 3)
 		double lresult = 0.0;
 
 #pragma omp parallel for num_threads(5)
 
 		for (int i = 0; i < size; i++)
 		{
-			lresult += static_cast<double>(x[i]);
+			lresult += static_cast<double>(table[i]);
 		}
 
 #pragma omp critical 
@@ -77,18 +90,18 @@ public:
 		return result / size;
 #endif
 
-#if (WERSJA == 4)
+#if (VERSION == 4)
 #pragma omp parallel  num_threads(5)
 #pragma opm for reduction(+: result)
 
-			for (int i = 0; i < size; i++)
-			{ 
-				result += static_cast<double>(x[i]);
-			}
+		for (int i = 0; i < size; i++)
+		{
+			result += static_cast<double>(table[i]);
+		}
 		return result / size;
 #endif
 
-	
+
 
 	}
 #undef WERSJA 
@@ -102,7 +115,7 @@ public:
 
 int main()
 {
-	cout << "hello\n";
+	cout << "Hello\n";
 
 	taskClass ob;
 
@@ -117,9 +130,6 @@ int main()
 
 	chrono::duration<double> elapsed_seconds = end - start;
 	cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
-
-
-
 
 	return 0;
 }
